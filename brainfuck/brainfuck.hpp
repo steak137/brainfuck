@@ -10,32 +10,53 @@ void execute(const std::string& bf_code) {
     std::vector<unsigned char> mem(MEM_SIZE, 0);
 
     while (idx < bf_code.length()) {
-        char c = bf_code[idx];
-        if (c == '+') mem[ptr] = (mem[ptr] + 1) % 256;
-        if (c == '-') mem[ptr] = (mem[ptr] + 255) % 256;
-        if (c == '>') ptr = (ptr + 1) % MEM_SIZE;
-        if (c == '<') ptr = (ptr + MEM_SIZE - 1) % MEM_SIZE;
-        if (c == '.') std::cout << mem[ptr];
-        if (c == ',') {
-            std::string input;
-            std::getline(std::cin, input);
-            mem[ptr] = input.empty() ? 0 : input[0] % 256;
-        }
-        if (c == '[' && !mem[ptr]) {
-            int depth = 1;
-            while (depth && idx + 1 < bf_code.length()) {
-                idx++;
-                if (bf_code[idx] == '[') depth++;
-                if (bf_code[idx] == ']') depth--;
+        switch (c) {
+        case '+':
+            mem[ptr]++;
+            break;
+        case '-':
+            mem[ptr]--;
+            break;
+        case '>':
+            ptr = (ptr + 1) % MEM_SIZE;
+            break;
+        case '<':
+            ptr = (ptr + MEM_SIZE - 1) % MEM_SIZE;
+            break;
+        case '.':
+            std::cout << mem[ptr];
+            break;
+        case ',':
+            char input;
+            std::cin >> input;
+            mem[ptr] = input;
+            break;
+        case '[':
+            if (mem[ptr] == 0) {
+                int loop_count = 1;
+                while (loop_count > 0) {
+                    idx++;
+                    if (bf_code[idx] == '[')
+                        loop_count++;
+                    else if (bf_code[idx] == ']')
+                        loop_count--;
+                }
             }
-        }
-        if (c == ']' && mem[ptr]) {
-            int depth = 1;
-            while (depth && idx - 1 >= 0) {
-                idx--;
-                if (bf_code[idx] == ']') depth++;
-                if (bf_code[idx] == '[') depth--;
+            break;
+        case ']':
+            if (mem[ptr] != 0) {
+                int loop_count = 1;
+                while (loop_count > 0) {
+                    idx--;
+                    if (bf_code[idx] == '[')
+                        loop_count--;
+                    else if (bf_code[idx] == ']')
+                        loop_count++;
+                }
             }
+            break;
+        default:
+            break;
         }
         idx++;
     }
